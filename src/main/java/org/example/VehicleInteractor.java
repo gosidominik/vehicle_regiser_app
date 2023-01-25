@@ -5,6 +5,7 @@ import org.example.entity.Vehicle;
 import org.example.presenter.VehicleResponseInterface;
 import org.example.repository.RepositoryAccess;
 import org.example.utils.JSONParser;
+import org.example.utils.Validator;
 import org.json.JSONObject;
 
 public class VehicleInteractor implements VehicleRequestInterface {
@@ -27,16 +28,24 @@ public class VehicleInteractor implements VehicleRequestInterface {
 
     @Override
     public void getVehicleById(JSONObject json) {
-
-        Vehicle vehicle = repositoryAccess.getVehicleByRegistrationNumber(JSONParser.parseFindRequestJson(json).getRegistrationNumber());
-        JSONObject vehicleJson = JSONParser.createResponseJson(vehicle);
-        vehicleResponseInterface.displayFind(vehicleJson);
+        if (!Validator.validate(json).has("message")) {
+            Vehicle vehicle = repositoryAccess.getVehicleByRegistrationNumber(JSONParser.parseFindRequestJson(json).getRegistrationNumber());
+            JSONObject vehicleJson = JSONParser.createResponseJson(vehicle);
+            vehicleResponseInterface.displayFind(vehicleJson);
+        } else {
+            vehicleResponseInterface.displayFind(json);
+        }
     }
 
     @Override
     public void save(JSONObject vehicleJson) {
-        Vehicle vehicle = repositoryAccess.registerVehicle(JSONParser.parseJSONtoVehicleModel(vehicleJson));
-        JSONObject saveResponseJson = JSONParser.createResponseJson(vehicle);
-        vehicleResponseInterface.displaySave(saveResponseJson);
+        if (!Validator.validate(vehicleJson).has("message")) {
+            Vehicle vehicle = repositoryAccess.registerVehicle(JSONParser.parseJSONtoVehicleModel(vehicleJson));
+            JSONObject saveResponseJson = JSONParser.createResponseJson(vehicle);
+            vehicleResponseInterface.displaySave(saveResponseJson);
+        } else {
+            vehicleResponseInterface.displaySave(vehicleJson);
+        }
+
     }
 }
